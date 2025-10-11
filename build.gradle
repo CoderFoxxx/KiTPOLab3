@@ -1,0 +1,43 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '2.1.10'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+    id 'application'
+}
+
+application {
+    mainClass = "me.twintailedfoxxx.nstu.AppMain"
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "17"
+}
+
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "17"
+}
+
+javafx {
+    version = "17.0.16"
+    modules = ['javafx.controls', 'javafx.graphics', 'javafx.fxml']
+}
+
+group = 'me.twintailedfoxxx.nstu'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation platform('org.jetbrains.kotlin:kotlin-bom')
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    implementation "no.tornado:tornadofx:1.7.20"
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+}
+
+test {
+    useJUnitPlatform()
+}
+kotlin {
+    jvmToolchain(17)
+}
