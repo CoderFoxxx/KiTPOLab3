@@ -1,10 +1,14 @@
 package me.twintailedfoxxx.nstu.datastructures
 
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.io.Serializable
+import java.nio.file.Files
+import java.nio.file.Paths
 
 class CyclicList<T> : Serializable {
     private var head: Node<T>? = null
@@ -25,6 +29,14 @@ class CyclicList<T> : Serializable {
 
             return readObj
         }
+
+//        fun <T> deserializeFromJson(fileName: String, clazz: Class<T>) : CyclicList<T>? {
+//            val gson = Gson()
+//            val json = Files.readString(Paths.get(fileName))
+//            val type = TypeToken.getParameterized(CyclicList::class.java, clazz).type
+//
+//            return gson.fromJson(json, type)
+//        }
     }
 
     fun add(data: T) {
@@ -132,6 +144,12 @@ class CyclicList<T> : Serializable {
         }
     }
 
+//    fun serializeToJson(fileName: String, clazz: Class<T>) {
+//        val gson = Gson()
+//        val json = gson.toJson(this)
+//        Files.write(Paths.get(fileName), json.toByteArray())
+//    }
+
     fun size(): Int {
         return size
     }
@@ -167,59 +185,74 @@ class CyclicList<T> : Serializable {
     }
 
     fun sort(comparator: Comparator<T>) {
-        if (size < 2) return
-
-        breakCycle()
-        head = mergeSort(head, comparator)
-        makeCyclic()
-    }
-
-    private fun breakCycle() {
-        if (head == null) return
-
-        var current = head
-        repeat(size - 1) {
-            current = current!!.next
-        }
-        current!!.next = null
-    }
-
-    private fun makeCyclic() {
-        if (head == null) return
-
-        var current = head
-        while (current!!.next != null) {
-            current = current.next
-        }
-        current.next = head
-    }
-
-    private fun mergeSort(start: Node<T>?, comparator: Comparator<T>): Node<T>? {
-        if (start?.next == null) return start
-
-        val middle = getMiddle(start)
-        val nextToMiddle = middle!!.next
-
-        middle.next = null
-
-        val left = mergeSort(start, comparator)
-        val right = mergeSort(nextToMiddle, comparator)
-
-        return merge(left, right, comparator)
-    }
-
-    private fun getMiddle(head: Node<T>?): Node<T>? {
-        if (head == null) return null
-
-        var slow = head
-        var fast = head
-
-        while (fast!!.next != null && fast.next!!.next != null) {
-            slow = slow!!.next!!
-            fast = fast.next!!.next!!
+        if(size <= 1) {
+            return
         }
 
-        return slow
+        val last: Node<T> = getNode(size - 1)
+        last.next = null
+        head = quickSort(head, comparator)
+
+        val tail: Node<T>? = getTail(head)
+        if(tail != null) {
+            tail.next = head
+        }
+    }
+
+    private fun quickSort(head: Node<T>?, comparator: Comparator<T>): Node<T>? {
+        if(head?.next == null) {
+            return head
+        }
+
+        val pivot: Node<T> = head
+        val rest: Node<T> = head.next!!
+
+        var lessHead: Node<T>? = null
+        var greaterHead: Node<T>? = null
+        var current: Node<T>? = rest
+
+        while(current != null) {
+            val next: Node<T>? = current.next
+
+            if(comparator.compare(current.data, pivot.data) < 0) {
+                current.next = lessHead
+                lessHead = current
+            } else {
+                current.next = greaterHead
+                greaterHead = current
+            }
+
+            current = next
+        }
+
+        val sortedLess: Node<T>? = quickSort(lessHead, comparator)
+        val sortedGreater: Node<T>? = quickSort(greaterHead, comparator)
+        val tailOfLess: Node<T>? = getTail(sortedLess)
+
+        if(tailOfLess != null) {
+            tailOfLess.next = pivot
+        }
+
+        pivot.next = sortedGreater
+
+        return when(sortedLess != null) {
+            true -> sortedLess
+            else -> pivot
+        }
+    }
+
+
+    private fun getTail(head: Node<T>?): Node<T>? {
+        if(head == null) {
+            return null;
+        }
+
+        var current: Node<T> = head
+        while(current.next != null) {
+            current = current.next!!
+        }
+
+        return current
     }
 
     private fun merge(left: Node<T>?, right: Node<T>?, comparator: Comparator<T>): Node<T>? {
@@ -245,55 +278,5 @@ class CyclicList<T> : Serializable {
         current!!.next = leftPtr ?: rightPtr
 
         return dummy.next
-    }
-
-    fun sortFunctional(comparator: Comparator<T>) {
-        if (size < 2) return
-
-        breakCycle()
-        head = head.mergeSortFunctional(comparator)
-        makeCyclic()
-    }
-
-    private fun Node<T>?.mergeSortFunctional(comparator: Comparator<T>): Node<T>? = when {
-        this == null || next == null -> this
-        else -> {
-            val (left, right) = splitAtMiddle()
-            mergeFunctional(
-                left.mergeSortFunctional(comparator),
-                right.mergeSortFunctional(comparator),
-                comparator
-            )
-        }
-    }
-
-    private fun Node<T>?.splitAtMiddle(): Pair<Node<T>?, Node<T>?> {
-        if (this == null || next == null) return Pair(this, null)
-
-        var slow: Node<T>? = this
-        var fast: Node<T>? = this
-        var prev: Node<T>? = null
-
-        while (fast?.next != null) {
-            fast = fast.next?.next
-            prev = slow
-            slow = slow?.next
-        }
-
-        prev?.next = null
-        return Pair(this, slow)
-    }
-
-    private fun mergeFunctional(left: Node<T>?, right: Node<T>?, comparator: Comparator<T>): Node<T>? {
-        if (left == null) return right
-        if (right == null) return left
-
-        return if (comparator.compare(left.data, right.data) <= 0) {
-            left.next = mergeFunctional(left.next, right, comparator)
-            left
-        } else {
-            right.next = mergeFunctional(left, right.next, comparator)
-            right
-        }
     }
 }

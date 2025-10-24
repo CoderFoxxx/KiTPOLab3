@@ -32,6 +32,7 @@ dependencies {
     implementation platform('org.jetbrains.kotlin:kotlin-bom')
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
     implementation "no.tornado:tornadofx:1.7.20"
+    implementation "com.google.code.gson:gson:2.11.0"
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
 }
 

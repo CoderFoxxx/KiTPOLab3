@@ -7,5 +7,6 @@ interface IUserType : Serializable {
     fun create() : Any
     fun clone() : Any
     fun parseValue(value: String) : Any
+    fun parseFromJson(json: String) : Any
     fun comparator() : Comparator<Any>
 }

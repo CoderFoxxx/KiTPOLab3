@@ -1,6 +1,5 @@
 package me.twintailedfoxxx.nstu
 
-import javafx.collections.ObservableList
 import javafx.fxml.FXML
 import javafx.scene.control.*
 import javafx.scene.layout.BorderPane
@@ -18,8 +17,10 @@ class AppView : View("Циклический список"), IModelListener {
     @FXML lateinit var addButton: Button
     @FXML lateinit var valueTextField: TextField
     @FXML lateinit var dataListView: ListView<String>
-    @FXML lateinit var loadButton: Button
-    @FXML lateinit var saveButton: Button
+    @FXML lateinit var loadBinaryButton: Button
+    @FXML lateinit var saveBinaryButton: Button
+    @FXML lateinit var loadJsonButton: Button
+    @FXML lateinit var saveJsonButton: Button
     @FXML lateinit var createListButton: Button
     @FXML lateinit var typeComboBox: ComboBox<String>
 
@@ -58,14 +59,14 @@ class AppView : View("Циклический список"), IModelListener {
     }
 
     @FXML
-    fun handleSave() {
+    fun handleBinarySave() {
         val chooser =  FileChooser()
         chooser.title = "Сохранить список"
         chooser.extensionFilters.add(FileChooser.ExtensionFilter("Binary Files", "*.bin"))
         val file: File? = chooser.showSaveDialog(statusLabel.scene.window)
         if(file != null) {
             try {
-                model.saveToFile(file.absolutePath)
+                model.saveToBinaryFile(file.absolutePath)
             } catch (e: Exception) {
                 showError("Ошибка сохранения", "Не удалось сохранить файл: ${e.message}")
             }
@@ -73,14 +74,46 @@ class AppView : View("Циклический список"), IModelListener {
     }
 
     @FXML
-    fun handleLoad() {
+    fun handleBinaryLoad() {
         val chooser = FileChooser()
         chooser.title = "Загрузить список"
         chooser.extensionFilters.add(FileChooser.ExtensionFilter("Binary Files", "*.bin"))
         val file: File? = chooser.showOpenDialog(statusLabel.scene.window)
         if(file != null) {
             try {
-                model.loadFromFile(file.absolutePath)
+                model.loadFromBinaryFile(file.absolutePath)
+            } catch (e: Exception) {
+                showError("Ошибка загрузки", "Не удалось загрузить файл: ${e.message}")
+            }
+        }
+    }
+
+    @FXML
+    fun handleJsonSave() {
+        val chooser = FileChooser()
+        chooser.title = "Сохранить список в JSON"
+        chooser.extensionFilters.add(FileChooser.ExtensionFilter("JavaScript Object Notation File", "*.json"))
+        val file: File? = chooser.showSaveDialog(statusLabel.scene.window)
+
+        if(file != null) {
+            try {
+                model.saveToJsonFile(file.absolutePath)
+            } catch (e: Exception) {
+                showError("Ошибка сохранения", "Не удалось сохранить файл: ${e.message}")
+            }
+        }
+    }
+
+    @FXML
+    fun handleJsonLoad() {
+        val chooser = FileChooser()
+        chooser.title = "Загрузить список из JSON"
+        chooser.extensionFilters.add(FileChooser.ExtensionFilter("JavaScript Object Notation File", "*.json"))
+        val file: File? = chooser.showOpenDialog(statusLabel.scene.window)
+
+        if(file != null) {
+            try {
+                model.loadFromJsonFile(file.absolutePath)
             } catch (e: Exception) {
                 showError("Ошибка загрузки", "Не удалось загрузить файл: ${e.message}")
             }
@@ -157,7 +190,7 @@ class AppView : View("Циклический список"), IModelListener {
                 model.sortList()
             }
             functionalBtn -> {
-                model.sortListFunctional()
+                //model.sortListFunctional()
             }
             else -> {}
         }
@@ -176,7 +209,7 @@ class AppView : View("Циклический список"), IModelListener {
         val listCreated: Boolean = model.isListCreated()
         typeComboBox.isDisable = false
         createListButton.isDisable = false
-        saveButton.isDisable = !listCreated
+        saveBinaryButton.isDisable = !listCreated
         dataListView.isDisable = !listCreated
         valueTextField.isDisable = !listCreated
         addButton.isDisable = !listCreated

@@ -1,7 +1,10 @@
 package me.twintailedfoxxx.nstu
 
+import com.google.gson.*
 import me.twintailedfoxxx.nstu.datastructures.CyclicList
 import me.twintailedfoxxx.nstu.types.IUserType
+import java.nio.file.Files
+import java.nio.file.Paths
 
 class Model {
     private var list: CyclicList<Any>? = null
@@ -70,14 +73,6 @@ class Model {
         notifyListeners()
     }
 
-    fun sortListFunctional() {
-        requireNotNull(list) { "List not created" }
-        requireNotNull(currentType) { "No current type" }
-
-        list!!.sortFunctional(currentType!!.comparator())
-        notifyListeners()
-    }
-
     fun getElementsList() : List<String> {
         if(list == null) {
             return ArrayList()
@@ -98,13 +93,13 @@ class Model {
         }
     }
 
-    fun saveToFile(fileName: String) {
+    fun saveToBinaryFile(fileName: String) {
         requireNotNull(list) { "List not created" }
 
         list!!.serialize(fileName)
     }
 
-    fun loadFromFile(fileName: String) {
+    fun loadFromBinaryFile(fileName: String) {
         list = CyclicList.deserialize(fileName)
         if(list != null && list!!.size() > 0) {
             val firstElem = list!!.get(0)
@@ -118,6 +113,46 @@ class Model {
             currentType = userFactory.getBuilderByName(typeName)
         } else if(list != null && list!!.size() == 0) {
             currentType = null
+        }
+
+        notifyListeners()
+    }
+
+    fun saveToJsonFile(fileName: String) {
+        requireNotNull(list) { "List not created" }
+
+        val jsonObject = JsonObject()
+        jsonObject.addProperty("typeName", currentType!!.typeName())
+
+        val jsonArray = JsonArray()
+        list!!.forEach {
+            jsonArray.add(Gson().toJsonTree(it))
+        }
+        jsonObject.add("elements", jsonArray)
+
+        val json = GsonBuilder()
+            .setPrettyPrinting()
+            .create()
+            .toJson(jsonObject)
+
+        Files.write(Paths.get(fileName), json.toByteArray())
+    }
+
+    fun loadFromJsonFile(fileName: String) {
+        val json = Files.readString(Paths.get(fileName))
+        val jsonObject = JsonParser.parseString(json).asJsonObject
+        val typeName = jsonObject.get("typeName").asString
+
+        currentType = userFactory.getBuilderByName(typeName)
+        if(currentType == null) {
+            throw IllegalStateException("Unknown type: $typeName")
+        }
+
+        list = CyclicList()
+        val jsonArray = jsonObject.getAsJsonArray("elements")
+
+        jsonArray.forEach {
+            list!!.add(currentType!!.parseFromJson(it.toString()))
         }
 
         notifyListeners()

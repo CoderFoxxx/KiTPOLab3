@@ -3,5 +3,6 @@ module KiTPOLab.main {
     requires tornadofx;
     requires kotlin.stdlib;
     requires javafx.fxml;
+    requires com.google.gson;
     exports me.twintailedfoxxx.nstu to javafx.graphics, javafx.fxml, tornadofx;
 }

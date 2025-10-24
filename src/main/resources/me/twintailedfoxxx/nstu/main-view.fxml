@@ -23,8 +23,10 @@
                 <Button fx:id="createListButton" mnemonicParsing="false" onAction="#handleCreateList"
                         text="Создать список"/>
                 <HBox alignment="CENTER_RIGHT" spacing="8.0" HBox.hgrow="ALWAYS">
-                    <Button fx:id="saveButton" mnemonicParsing="false" onAction="#handleSave" text="Сохранить"/>
-                    <Button fx:id="loadButton" mnemonicParsing="false" onAction="#handleLoad" text="Загрузить"/>
+                    <Button fx:id="saveBinaryButton" mnemonicParsing="false" onAction="#handleBinarySave" text="Сохранить (bin)"/>
+                    <Button fx:id="loadBinaryButton" mnemonicParsing="false" onAction="#handleBinaryLoad" text="Загрузить (bin)"/>
+                    <Button fx:id="saveJsonButton" mnemonicParsing="false" onAction="#handleJsonSave" text="Сохранить (JSON)"/>
+                    <Button fx:id="loadJsonButton" mnemonicParsing="false" onAction="#handleJsonLoad" text="Загрузить (JSON)"/>
                 </HBox>
             </HBox>
         </VBox>
