@@ -15,19 +15,18 @@ class CyclicList<T> : Serializable {
     private var size: Int = 0
 
     companion object {
-        fun <T> deserialize(fileName: String) : CyclicList<T>? {
+        fun <T> deserialize(fileName: String): CyclicList<T> {
             val fis = FileInputStream(fileName)
             val ois = ObjectInputStream(fis)
-            val readObj: CyclicList<T>?
 
             try {
-                readObj = ois.readObject() as CyclicList<T>
+                return ois.readObject() as CyclicList<T>
+            } catch (e: Exception) {
+                throw IllegalStateException("Failed to deserialize list: ${e.message}", e)
             } finally {
                 ois.close()
                 fis.close()
             }
-
-            return readObj
         }
 
 //        fun <T> deserializeFromJson(fileName: String, clazz: Class<T>) : CyclicList<T>? {
@@ -159,14 +158,17 @@ class CyclicList<T> : Serializable {
             return "[]"
         }
 
-        val sb: StringBuilder = StringBuilder("[ ")
-        var current: Node<T>? = head
-        while(current != null) {
+        val sb = StringBuilder("[ ")
+        var current = head
+        var count = 0
+
+        while(current != null && count < size) {
             sb.append(current.data.toString())
-            if(current.next != null) {
+            if(count < size - 1) {
                 sb.append(", ")
             }
             current = current.next
+            count++
         }
 
         sb.append(" ]")

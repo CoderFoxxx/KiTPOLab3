@@ -41,35 +41,35 @@ class Model {
     }
 
     fun addElement(value: String) {
-        requireNotNull(list) { "List not created" }
-        requireNotNull(currentType) { "No current type" }
+        val list = list ?: throw IllegalArgumentException("List not created")
+        val type = currentType ?: throw IllegalArgumentException("No current type")
+        val elem = type.parseValue(value)
 
-        val elem = currentType!!.parseValue(value)
-        list!!.add(elem)
+        list.add(elem)
         notifyListeners()
     }
 
     fun addElementAt(idx: Int, value: String) {
-        requireNotNull(list) { "List not created" }
-        requireNotNull(currentType) { "No current type" }
+        val list = list ?: throw IllegalArgumentException("List not created")
+        val type = currentType ?: throw IllegalArgumentException("No current type")
+        val elem = type.parseValue(value)
 
-        val elem = currentType!!.parseValue(value)
-        list!!.add(idx, elem)
+        list.add(idx, elem)
         notifyListeners()
     }
 
     fun removeElement(idx: Int) {
-        requireNotNull(list) { "List not created" }
+        val list = list ?: throw IllegalArgumentException("List not created")
 
-        list!!.remove(idx)
+        list.remove(idx)
         notifyListeners()
     }
 
     fun sortList() {
-        requireNotNull(list) { "List not created" }
-        requireNotNull(currentType) { "No current type" }
+        val list = list ?: throw IllegalArgumentException("List not created")
+        val type = currentType ?: throw IllegalArgumentException("No current type")
 
-        list!!.sort(currentType!!.comparator())
+        list.sort(type.comparator())
         notifyListeners()
     }
 
@@ -94,27 +94,26 @@ class Model {
     }
 
     fun saveToBinaryFile(fileName: String) {
-        requireNotNull(list) { "List not created" }
-
-        list!!.serialize(fileName)
+        val list = list ?: throw IllegalArgumentException("List not created")
+        list.serialize(fileName)
     }
 
     fun loadFromBinaryFile(fileName: String) {
-        list = CyclicList.deserialize(fileName)
-        if(list != null && list!!.size() > 0) {
-            val firstElem = list!!.get(0)
-            val typeName = userFactory.getTypeNameList().stream()
-                .filter {
-                    userFactory.getBuilderByName(it)!!.javaClass.isInstance(firstElem)
-                }
-                .findFirst()
-                .orElse(null)
-
-            currentType = userFactory.getBuilderByName(typeName)
-        } else if(list != null && list!!.size() == 0) {
-            currentType = null
+        try {
+            list = CyclicList.deserialize(fileName)
+            if (list!!.size() > 0) {
+                val firstElem = list!!.get(0)
+                currentType = userFactory.getTypeNameList()
+                    .firstNotNullOfOrNull { typeName -> 
+                        userFactory.getBuilderByName(typeName)?.takeIf { it.javaClass.isInstance(firstElem) }
+                    }
+                    ?: throw IllegalStateException("Unknown type for deserialized data")
+            } else {
+                currentType = null
+            }
+        } catch (e: Exception) {
+            throw IllegalStateException("Failed to load file: ${e.message}", e)
         }
-
         notifyListeners()
     }
 
