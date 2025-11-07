@@ -1,58 +1,45 @@
 package me.twintailedfoxxx.nstu.datastructures
 
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.io.Serializable
-import java.nio.file.Files
-import java.nio.file.Paths
 
 class CyclicList<T> : Serializable {
     private var head: Node<T>? = null
     private var size: Int = 0
 
     companion object {
-        fun <T> deserialize(fileName: String): CyclicList<T> {
+        fun <T> deserialize(fileName: String) : CyclicList<T> {
             val fis = FileInputStream(fileName)
             val ois = ObjectInputStream(fis)
+            val readObj: CyclicList<T>
 
             try {
-                return ois.readObject() as CyclicList<T>
-            } catch (e: Exception) {
-                throw IllegalStateException("Failed to deserialize list: ${e.message}", e)
+                readObj = ois.readObject() as CyclicList<T>
             } finally {
                 ois.close()
                 fis.close()
             }
-        }
 
-//        fun <T> deserializeFromJson(fileName: String, clazz: Class<T>) : CyclicList<T>? {
-//            val gson = Gson()
-//            val json = Files.readString(Paths.get(fileName))
-//            val type = TypeToken.getParameterized(CyclicList::class.java, clazz).type
-//
-//            return gson.fromJson(json, type)
-//        }
+            return readObj
+        }
     }
 
     fun add(data: T) {
         val newNode = Node(data)
-        if(head == null) {
+        if (head == null) {
             head = newNode
-            head!!.next = head
+            newNode.next = newNode
         } else {
             var current = head
-            while(current!!.next != head) {
-                current = current.next
+            while (current?.next !== head) {
+                current = current?.next
             }
-
             newNode.next = head
-            current.next = newNode
+            current?.next = newNode
         }
-
         size++
     }
 
@@ -68,7 +55,7 @@ class CyclicList<T> : Serializable {
         if (index == 0) {
             if (head == null) {
                 head = newNode
-                head!!.next = head
+                newNode.next = newNode
             } else {
                 val lastNode = getNode(size - 1)
                 newNode.next = head
@@ -84,15 +71,13 @@ class CyclicList<T> : Serializable {
     }
 
     fun forEach(func: (data: T) -> Unit) {
-        if(head == null) {
-            return
-        }
+        if (head == null) return
 
         var current = head
         do {
-            func(current!!.data)
-            current = current.next
-        } while (current != head)
+            current?.let { func(it.data) }
+            current = current?.next
+        } while (current !== head)
     }
 
     fun get(idx: Int): T {
@@ -100,34 +85,31 @@ class CyclicList<T> : Serializable {
     }
 
     fun remove(idx: Int) {
-        require(idx in 0..<size) { "Index out of bounds" }
+        require(idx in 0 until size) { "Index out of bounds" }
 
-        if(size == 1) {
+        if (size == 1) {
             head = null
-        } else if(idx == 0) {
+        } else if (idx == 0) {
             val lastNode = getNode(size - 1)
-            head = head!!.next
+            head = head?.next
             lastNode.next = head
         } else {
             val prevNode = getNode(idx - 1)
-            prevNode.next = prevNode.next!!.next
+            prevNode.next = prevNode.next?.next
         }
 
         size--
     }
 
-    fun toList() : List<T> {
+    fun toList(): List<T> {
         val list = ArrayList<T>()
-        if(head == null) {
-            return list
-        }
+        if (head == null) return list
 
         var current = head
-        for(i in 0 until size) {
-            list.add(current!!.data)
-            current = current.next
+        repeat(size) {
+            current?.let { list.add(it.data) }
+            current = current?.next
         }
-
         return list
     }
 
@@ -154,35 +136,27 @@ class CyclicList<T> : Serializable {
     }
 
     override fun toString(): String {
-        if(head == null) {
-            return "[]"
-        }
+        if (head == null) return "[]"
 
         val sb = StringBuilder("[ ")
         var current = head
         var count = 0
-
-        while(current != null && count < size) {
+        while (current != null && count < size) {
             sb.append(current.data.toString())
-            if(count < size - 1) {
-                sb.append(", ")
-            }
+            if (count < size - 1) sb.append(", ")
             current = current.next
             count++
         }
-
         sb.append(" ]")
         return sb.toString()
     }
 
     private fun getNode(idx: Int): Node<T> {
-        require(idx in 0..<size) { "Index out of bounds" }
-
+        require(idx in 0 until size) { "Index out of bounds" }
         var current = head
-        for(i in 0 until idx) {
-            current = current!!.next
+        repeat(idx) {
+            current = current?.next
         }
-
         return current!!
     }
 
@@ -243,10 +217,9 @@ class CyclicList<T> : Serializable {
         }
     }
 
-
     private fun getTail(head: Node<T>?): Node<T>? {
         if(head == null) {
-            return null;
+            return null
         }
 
         var current: Node<T> = head
@@ -255,30 +228,5 @@ class CyclicList<T> : Serializable {
         }
 
         return current
-    }
-
-    private fun merge(left: Node<T>?, right: Node<T>?, comparator: Comparator<T>): Node<T>? {
-        if (left == null) return right
-        if (right == null) return left
-
-        val dummy = Node(null as T)
-        var current: Node<T>? = dummy
-        var leftPtr = left
-        var rightPtr = right
-
-        while (leftPtr != null && rightPtr != null) {
-            if (comparator.compare(leftPtr.data, rightPtr.data) <= 0) {
-                current!!.next = leftPtr
-                leftPtr = leftPtr.next
-            } else {
-                current!!.next = rightPtr
-                rightPtr = rightPtr.next
-            }
-            current = current.next
-        }
-
-        current!!.next = leftPtr ?: rightPtr
-
-        return dummy.next
     }
 }
