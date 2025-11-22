@@ -125,12 +125,6 @@ class CyclicList<T> : Serializable {
         }
     }
 
-//    fun serializeToJson(fileName: String, clazz: Class<T>) {
-//        val gson = Gson()
-//        val json = gson.toJson(this)
-//        Files.write(Paths.get(fileName), json.toByteArray())
-//    }
-
     fun size(): Int {
         return size
     }

@@ -25,9 +25,9 @@ class CyclicListTest {
 
     @Test
     fun `test add and get integers`() {
-        integerList.add(integerType.parseValue("5"))
-        integerList.add(integerType.parseValue("10"))
-        integerList.add(integerType.parseValue("15"))
+        integerList.add(MyInteger(5))
+        integerList.add(MyInteger(10))
+        integerList.add(MyInteger(15))
 
         assertEquals("Целое число: 5", integerList.get(0).toString())
         assertEquals("Целое число: 10", integerList.get(1).toString())
@@ -37,8 +37,8 @@ class CyclicListTest {
 
     @Test
     fun `test add and get vectors`() {
-        vectorList.add(vectorType.parseValue("5.0 45.0"))
-        vectorList.add(vectorType.parseValue("3.0 90.0"))
+        vectorList.add(PolarVector(5.0, 45.0))
+        vectorList.add(PolarVector(3.0, 90.0))
 
         assertEquals("Длина: 5.0, Угол: 45.0°", vectorList.get(0).toString())
         assertEquals("Длина: 3.0, Угол: 90.0°", vectorList.get(1).toString())
@@ -47,9 +47,9 @@ class CyclicListTest {
 
     @Test
     fun `test insert at index`() {
-        integerList.add(integerType.parseValue("1"))
-        integerList.add(integerType.parseValue("3"))
-        integerList.add(1, integerType.parseValue("2"))
+        integerList.add(MyInteger(1))
+        integerList.add(MyInteger(3))
+        integerList.add(1, MyInteger(2))
 
         assertEquals("Целое число: 1", integerList.get(0).toString())
         assertEquals("Целое число: 2", integerList.get(1).toString())
@@ -58,9 +58,9 @@ class CyclicListTest {
 
     @Test
     fun `test remove element`() {
-        vectorList.add(vectorType.parseValue("1.0 0.0"))
-        vectorList.add(vectorType.parseValue("2.0 45.0"))
-        vectorList.add(vectorType.parseValue("3.0 90.0"))
+        vectorList.add(PolarVector(1.0, 0.0))
+        vectorList.add(PolarVector(2.0, 45.0))
+        vectorList.add(PolarVector(3.0, 90.0))
 
         vectorList.remove(1)
         assertEquals(2, vectorList.size())
@@ -70,9 +70,9 @@ class CyclicListTest {
 
     @Test
     fun `test imperative sort integers`() {
-        integerList.add(integerType.parseValue("3"))
-        integerList.add(integerType.parseValue("1"))
-        integerList.add(integerType.parseValue("2"))
+        integerList.add(MyInteger(3))
+        integerList.add(MyInteger(1))
+        integerList.add(MyInteger(2))
 
         integerList.sort(integerType.comparator())
 
@@ -84,8 +84,8 @@ class CyclicListTest {
     @Test
     fun `same values sorting test`() {
         for(i in 0..<10) {
-            integerList.add(integerType.parseValue("0"))
-            integerExpectedList.add(integerType.parseValue("0"))
+            integerList.add(MyInteger(0))
+            integerExpectedList.add(MyInteger(0))
         }
 
         integerList.sort(integerType.comparator())
@@ -95,11 +95,11 @@ class CyclicListTest {
     @Test
     fun `backwards list sorting test`() {
         for(i in 10 downTo 0) {
-            integerList.add(integerType.parseValue("$i"))
+            integerList.add(MyInteger(i))
         }
 
         for(i in 0..10) {
-            integerExpectedList.add(integerType.parseValue("$i"))
+            integerExpectedList.add(MyInteger(i))
         }
 
         integerList.sort(integerType.comparator())
@@ -108,15 +108,23 @@ class CyclicListTest {
 
     @Test
     fun `repeating values sorting test`() {
-        val numbers = listOf("0", "1", "2", "3", "4", "2")
+        val numbers = listOf(
+            MyInteger(0),
+            MyInteger(1),
+            MyInteger(2),
+            MyInteger(3),
+            MyInteger(4),
+            MyInteger(2),
+        )
+
         for(number in numbers) {
-            integerList.add(integerType.parseValue(number))
+            integerList.add(number)
         }
         integerList.sort(integerType.comparator())
 
         Collections.sort(numbers)
         for(number in numbers) {
-            integerExpectedList.add(integerType.parseValue(number))
+            integerExpectedList.add(number)
         }
 
         assertEquals(integerExpectedList.toString(), integerList.toString())
@@ -124,15 +132,23 @@ class CyclicListTest {
 
     @Test
     fun `group of repeating values sorting test`() {
-        val numbers = listOf("3", "1", "2", "1", "3", "2")
+        val numbers = listOf(
+            MyInteger(3),
+            MyInteger(1),
+            MyInteger(2),
+            MyInteger(1),
+            MyInteger(3),
+            MyInteger(2)
+        )
+
         for(number in numbers) {
-            integerList.add(integerType.parseValue(number))
+            integerList.add(number)
         }
         integerList.sort(integerType.comparator())
 
         Collections.sort(numbers)
         for(number in numbers) {
-            integerExpectedList.add(integerType.parseValue(number))
+            integerExpectedList.add(number)
         }
 
         assertEquals(integerExpectedList.toString(), integerList.toString())
@@ -140,15 +156,22 @@ class CyclicListTest {
 
     @Test
     fun `max value at the start sorting test`() {
-        val numbers = listOf("9999", "6", "4", "0", "2", "1")
+        val numbers = listOf(
+            MyInteger(Int.MAX_VALUE),
+            MyInteger(6),
+            MyInteger(4),
+            MyInteger(0),
+            MyInteger(2),
+            MyInteger(1),
+        )
         for(number in numbers) {
-            integerList.add(integerType.parseValue(number))
+            integerList.add(number)
         }
         integerList.sort(integerType.comparator())
 
         Collections.sort(numbers)
         for(number in numbers) {
-            integerExpectedList.add(integerType.parseValue(number))
+            integerExpectedList.add(number)
         }
 
         assertEquals(integerExpectedList.toString(), integerList.toString())
@@ -156,15 +179,22 @@ class CyclicListTest {
 
     @Test
     fun `max value at the middle sorting test`() {
-        val numbers = listOf("8", "6", "9999", "2", "4")
+        val numbers = listOf(
+            MyInteger(8),
+            MyInteger(6),
+            MyInteger(Int.MAX_VALUE),
+            MyInteger(2),
+            MyInteger(4),
+        )
+
         for(number in numbers) {
-            integerList.add(integerType.parseValue(number))
+            integerList.add(number)
         }
         integerList.sort(integerType.comparator())
 
         Collections.sort(numbers)
         for(number in numbers) {
-            integerExpectedList.add(integerType.parseValue(number))
+            integerExpectedList.add(number)
         }
 
         assertEquals(integerExpectedList.toString(), integerList.toString())
@@ -172,15 +202,23 @@ class CyclicListTest {
 
     @Test
     fun `max value at the end sorting test`() {
-        val numbers = listOf("8", "6", "4", "0", "2", "9999")
+        val numbers = listOf(
+            MyInteger(8),
+            MyInteger(6),
+            MyInteger(4),
+            MyInteger(0),
+            MyInteger(2),
+            MyInteger(Int.MAX_VALUE)
+        )
+
         for(number in numbers) {
-            integerList.add(integerType.parseValue(number))
+            integerList.add(number)
         }
         integerList.sort(integerType.comparator())
 
         Collections.sort(numbers)
         for(number in numbers) {
-            integerExpectedList.add(integerType.parseValue(number))
+            integerExpectedList.add(number)
         }
 
         assertEquals(integerExpectedList.toString(), integerList.toString())
@@ -188,15 +226,24 @@ class CyclicListTest {
 
     @Test
     fun `multiple max values sorting test`() {
-        val numbers = listOf("9999", "8", "6", "9999", "0", "2", "9999")
+        val numbers = listOf(
+            MyInteger(Int.MAX_VALUE),
+            MyInteger(8),
+            MyInteger(6),
+            MyInteger(Int.MAX_VALUE),
+            MyInteger(0),
+            MyInteger(2),
+            MyInteger(Integer.MAX_VALUE)
+        )
+
         for(number in numbers) {
-            integerList.add(integerType.parseValue(number))
+            integerList.add(number)
         }
         integerList.sort(integerType.comparator())
 
         Collections.sort(numbers)
         for(number in numbers) {
-            integerExpectedList.add(integerType.parseValue(number))
+            integerExpectedList.add(number)
         }
 
         assertEquals(integerExpectedList.toString(), integerList.toString())
@@ -205,11 +252,11 @@ class CyclicListTest {
     @Test
     fun `sort performance test`() {
         for(i in 1..1024 step { it * 2 }) {
-            val size = 10000
+            val size = i * 1000
             val random = Random()
 
             for (j in 0 until size) {
-                integerList.add(integerType.parseValue(random.nextInt(10000).toString()))
+                integerList.add(MyInteger(random.nextInt(1000)))
             }
 
             val startTime = System.currentTimeMillis()
@@ -222,8 +269,8 @@ class CyclicListTest {
 
     @Test
     fun `test serialization and deserialization`() {
-        integerList.add(integerType.parseValue("1"))
-        integerList.add(integerType.parseValue("2"))
+        integerList.add(MyInteger(1))
+        integerList.add(MyInteger(2))
 
         val tempFile = File.createTempFile("test", ".bin")
         tempFile.deleteOnExit()
@@ -249,8 +296,8 @@ class CyclicListTest {
 
     @Test
     fun `test toList conversion`() {
-        vectorList.add(vectorType.parseValue("1.0 0.0"))
-        vectorList.add(vectorType.parseValue("2.0 45.0"))
+        vectorList.add(PolarVector(1.0, 0.0))
+        vectorList.add(PolarVector(2.0, 45.0))
 
         val list = vectorList.toList()
         assertEquals(2, list.size)
@@ -261,8 +308,8 @@ class CyclicListTest {
     @Test
     fun `test forEach`() {
         val elements = mutableListOf<String>()
-        integerList.add(integerType.parseValue("1"))
-        integerList.add(integerType.parseValue("2"))
+        integerList.add(MyInteger(1))
+        integerList.add(MyInteger(2))
 
         integerList.forEach { elements.add(it.toString()) }
 
@@ -273,7 +320,7 @@ class CyclicListTest {
 
     @Test
     fun `test invalid index operations`() {
-        integerList.add(integerType.parseValue("1"))
+        integerList.add(MyInteger(1))
 
         assertThrows(IllegalArgumentException::class.java) {
             integerList.get(-1)

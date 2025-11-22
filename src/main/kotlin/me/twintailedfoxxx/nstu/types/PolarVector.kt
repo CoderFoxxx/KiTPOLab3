@@ -28,9 +28,9 @@ class PolarVector(private val length: Double = 0.0, private val angle: Double = 
         }
 
         if (trimmedJson.startsWith("{")) {
-            val json = JsonParser.parseString(trimmedJson).asJsonObject
-            val len = json["length"].asDouble
-            val ang = json["angle"].asDouble
+            val parsed = JsonParser.parseString(trimmedJson).asJsonObject
+            val len = parsed["length"].asDouble
+            val ang = parsed["angle"].asDouble
             return PolarVector(len, ang)
         } else {
             val parts: Array<String> = trimmedJson.split("\\s+".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()

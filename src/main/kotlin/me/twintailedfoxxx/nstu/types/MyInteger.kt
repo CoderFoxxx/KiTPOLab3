@@ -2,7 +2,7 @@ package me.twintailedfoxxx.nstu.types
 
 import com.google.gson.JsonParser
 
-class MyInteger(private val value: Int = 0) : IUserType {
+class MyInteger(private val value: Int = 0) : IUserType, Comparable<MyInteger> {
     override fun typeName(): String = "Integer"
     override fun create(): Any = MyInteger()
     override fun clone(): Any = MyInteger(value)
@@ -22,11 +22,15 @@ class MyInteger(private val value: Int = 0) : IUserType {
 
         if (trimmedJson.startsWith("{")) {
             val parsed = JsonParser.parseString(trimmedJson).asJsonObject
-            val `val` = parsed["value"].asDouble
-            return MyInteger(`val`.toInt())
+            val value = parsed["value"].asDouble
+            return MyInteger(value.toInt())
         } else {
             return MyInteger(value)
         }
+    }
+
+    override fun compareTo(other: MyInteger): Int {
+        return comparator().compare(this, other)
     }
 
     override fun toString(): String = "Целое число: $value"

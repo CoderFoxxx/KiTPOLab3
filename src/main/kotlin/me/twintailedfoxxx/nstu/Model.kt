@@ -74,23 +74,21 @@ class Model {
     }
 
     fun getElementsList() : List<String> {
-        if(list == null) {
+        val list = list ?: run {
             return ArrayList()
         }
 
         val elements = ArrayList<String>()
-        for(i in 0..<list!!.size()) {
-            elements.add(list!!.get(i).toString())
+        for(i in 0..<list.size()) {
+            elements.add(list.get(i).toString())
         }
 
         return elements
     }
 
     fun getListSize() : Int {
-        return when {
-            (list != null) -> list!!.size()
-            else -> 0
-        }
+        val list = list ?: throw IllegalArgumentException("List not created")
+        return list.size()
     }
 
     fun saveToBinaryFile(fileName: String) {
@@ -118,13 +116,13 @@ class Model {
     }
 
     fun saveToJsonFile(fileName: String) {
-        requireNotNull(list) { "List not created" }
+        val list = list ?: throw IllegalArgumentException("List not created")
 
         val jsonObject = JsonObject()
         jsonObject.addProperty("typeName", currentType!!.typeName())
 
         val jsonArray = JsonArray()
-        list!!.forEach {
+        list.forEach {
             jsonArray.add(Gson().toJsonTree(it))
         }
         jsonObject.add("elements", jsonArray)
